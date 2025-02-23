@@ -34,52 +34,31 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        // this is for the api
-        async function fetchWildfireAlerts() {
-            try {
-                const response = await fetch('https://api.weather.gov/alerts/active?event=Fire%20Warning');
-                const data = await response.json();
+        // Fetch wildfire alerts and add polygons to the map
+        //      status is set to actual so that test alerts are not included
+        //      alerts are fetched where the event is a "Fire Weather Watch" or a "Red Flag Warning"
+        fetch('https://api.weather.gov/alerts/active?status=actual&event=Fire%20Weather%20Watch&event=Red%20Flag%20Warning')
+            .then(response => response.json())
+            .then(data => {
+                data.features.forEach(alert => {
+                    if (alert.geometry && alert.geometry.type === "Polygon") {
+                        // Create an array of [latitude,longitude] pairs that represent the alert perimeter
+                        var coords = alert.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
 
-                console.log(data);
+                        // Set polygon color based on alert type
+                        var color = alert.properties.event === "Fire Weather Watch" ? "orange" : "red";
 
-                let fireAlerts = data.features.filter(alert =>
-                    alert.properties.event.includes("Fire") ||
-                    alert.properties.event.includes("Wildfire") ||
-                    alert.properties.event.includes("Red Flag Warning")
-                );
-
-                if (fireAlerts.length == 0) {
-                    alert("No active wildfire alerts found.");
-                    return;
-                }
-
-                fireAlerts.forEach(alert => {
-                    let alertDetails = alert.properties;
-                    let alertLocation = alertDetails.areaDesc || "Unknown Location";
-
-                    if (alert.geometry && alert.geometry.coordinates) {
-                        let coords = alert.geometry.coordinates;
-
-                        if (Array.isArray(coords[0])) {
-                            coords = coords[0];
-                        }
-                        let lat = coords[1];
-                        let lon = coords[0];
-
-                        L.marker([lat, lon]).addTo(map)
-                        .bindPopup(`<b>${alertDetails.headline}</b><br>${alertDetails.description}<br><b>Location:</b> ${alertLocation}`);
+                        // Add the polygon to the map
+                        L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
+                            .bindPopup(`<b>${alert.properties.event}</b>
+                                        <br>${alert.properties.areaDesc}
+                                        <br>${alert.properties.headline}`);
                     } else {
-                        console.warn(`No coordinates for: ${alertDetails.headline}`);
-
+                        console.warn("No coordinates for: ", alert.headline);
                     }
-
                 });
-            } catch (error) {
-                console.error("Error fetching wildfire alerts:", error);
-            }
-        }
-
-        fetchWildfireAlerts();
+            })
+            .catch(error => console.error("Error fetching wildfire alerts: ", error));
     </script>
 </div>
 
