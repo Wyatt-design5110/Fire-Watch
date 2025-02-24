@@ -6,34 +6,72 @@
     <link rel="icon" type="image/x-icon" href="icon.ico">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""/>
-
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""></script>
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
 
     <style>
         #map { height: 100%; }
     </style>
-   
+
 </head>
 <body>
 
-<div id="map">
-    <script>
+<div id="map"></div>
 
-        // set the beginning location for the map
-        var map = L.map('map').setView([38, -98], 4);   // [latitude, longitude], zoomFactor
+<script>
 
-        // add OpenStreetMap layer
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
+    // Initialize map with default view
+    var map = L.map('map').setView([38, -98], 4);
 
-    </script>
-</div>
+    // Add OpenStreetMap tile layer
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Function to fetch and display wildfire alerts
+    function loadWildfireAlerts() {
+        fetch('https://api.weather.gov/alerts/active?status=actual&event=Fire%20Weather%20Watch&event=Red%20Flag%20Warning')
+            .then(response => response.json())
+            .then(data => {
+                if (data.features.length === 0) {
+                    console.warn("No active wildfire alerts.");
+                    return;
+                }
+
+                // Create a GeoJSON layer and add it to the map
+                var wildfireLayer = L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: feature.properties.event === "Fire Weather Watch" ? "orange" : "red",
+                            weight: 2,
+                            fillOpacity: 0.4
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties) {
+                            layer.bindPopup(
+                                `<b>${feature.properties.event}</b><br>
+                                <strong>Affected Area:</strong> ${feature.properties.areaDesc}<br>
+                                <strong>Details:</strong> ${feature.properties.headline}`
+                            );
+                        }
+                    }
+                });
+
+                // Add vector layer to the map
+                wildfireLayer.addTo(map);
+            })
+            .catch(error => console.error("Error fetching wildfire alerts: ", error));
+    }
+
+    // Load wildfire alerts on page load
+    loadWildfireAlerts();
+
+</script>
 
 </body>
 </html>
