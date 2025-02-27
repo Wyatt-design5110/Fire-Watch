@@ -34,31 +34,57 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        // Fetch wildfire alerts and add polygons to the map
-        //      status is set to actual so that test alerts are not included
-        //      alerts are fetched where the event is a "Fire Weather Watch" or a "Red Flag Warning"
-        fetch('https://api.weather.gov/alerts/active?status=actual&event=Fire%20Weather%20Watch&event=Red%20Flag%20Warning')
-            .then(response => response.json())
-            .then(data => {
-                data.features.forEach(alert => {
+        // Function to fetch and display NWS alerts
+        async function fetchAndDisplayAlerts(eventType, color) {
+            try {
+                // Fetch alerts of the given eventType where status=actual (to exclude test alerts)
+                const response = await fetch(`https://api.weather.gov/alerts/active?event=${encodeURIComponent(eventType)}&status=actual`);
+                const data = await response.json();
+    
+                for (let alert of data.features) {
+                    // Case 1: Alert contains direct geometry (polygon)
                     if (alert.geometry && alert.geometry.type === "Polygon") {
+                        
                         // Create an array of [latitude,longitude] pairs that represent the alert perimeter
-                        var coords = alert.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
-
-                        // Set polygon color based on alert type
-                        var color = alert.properties.event === "Fire Weather Watch" ? "orange" : "red";
-
+                        let coords = alert.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                        
                         // Add the polygon to the map
                         L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
-                            .bindPopup(`<b>${alert.properties.event}</b>
-                                        <br>${alert.properties.areaDesc}
-                                        <br>${alert.properties.headline}`);
-                    } else {
-                        console.warn("No coordinates for: ", alert.headline);
+                            .bindPopup(`<b>${alert.properties.event}</b><br>${alert.properties.headline}`);
+                    } 
+                    // Case 2: Alert provides affectedZones (UGC geocode) instead of geometry
+                    else if (alert.properties.affectedZones) {
+                        for (let zoneURL of alert.properties.affectedZones) {
+                            try {
+                                // Fetch the coordinates of the given affectedZone
+                                let zoneResponse = await fetch(zoneURL);
+                                let zoneData = await zoneResponse.json();
+    
+                                if (zoneData.geometry && zoneData.geometry.type === "Polygon") {
+                                    
+                                    // Create an array of [latitude,longitude] pairs that represent the zone perimeter
+                                    let zoneCoords = zoneData.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                                    
+                                    // Add the polygon to the map
+                                    L.polygon(zoneCoords, { color: color, fillOpacity: 0.4 }).addTo(map)
+                                        .bindPopup(`<b>${alert.properties.event}</b>
+                                                    <br>${alert.properties.areaDesc}
+                                                    <br>${alert.properties.headline}`);
+                                }
+                            } catch (error) {
+                                console.error("Error fetching zone data:", error);
+                            }
+                        }
                     }
-                });
-            })
-            .catch(error => console.error("Error fetching wildfire alerts: ", error));
+                }
+            } catch (error) {
+                console.error(`Error fetching ${eventType} alerts:`, error);
+            }
+        }
+    
+        // Fetch alerts for both wildfire event types
+        fetchAndDisplayAlerts("Fire Weather Watch", "orange");
+        fetchAndDisplayAlerts("Red Flag Warning", "red");
     </script>
 </div>
 
