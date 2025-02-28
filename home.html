@@ -50,7 +50,9 @@
                         
                         // Add the polygon to the map
                         L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
-                            .bindPopup(`<b>${alert.properties.event}</b><br>${alert.properties.headline}`);
+                            .bindPopup(`<b>${alert.properties.event}</b>
+                                        <br>${alert.properties.areaDesc}
+                                        <br>${alert.properties.headline}`);
                     } 
                     // Case 2: Alert provides affectedZones (UGC geocode) instead of geometry
                     else if (alert.properties.affectedZones) {
