@@ -1,39 +1,63 @@
+<!DOCTYPE html>
 <html>
 <head>
-
     <title>FireWatch</title>
-
     <link rel="icon" type="image/x-icon" href="icon.ico">
-
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""/>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""></script>
-
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
     <style>
-        #map { height: 100%; }
+        body, html { margin: 0; padding: 0; height: 100%; }
+        #map { height: 90vh; }
+        #controls { padding: 10px; background: white; position: absolute; top: 10px; left: 10px; z-index: 1000; }
     </style>
-   
 </head>
 <body>
 
-<div id="map">
-    <script>
-
-        // set the beginning location for the map
-        var map = L.map('map').setView([38, -98], 4);   // [latitude, longitude], zoomFactor
-
-        // add OpenStreetMap layer
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-
-    </script>
+<div id="controls">
+    <label><input type="checkbox" id="filter-fire" checked> Fire Incidents</label>
+    <label><input type="checkbox" id="filter-station" checked> Fire Stations</label>
 </div>
+
+<div id="map"></div>
+
+<script>
+    var map = L.map('map').setView([38, -98], 4);
+    
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    
+    // Add search control (only one instance now)
+    L.Control.geocoder().addTo(map);
+    
+    var markers = {
+        fire: [
+            L.marker([37.7749, -122.4194]).bindPopup("Fire Incident in San Francisco"),
+            L.marker([34.0522, -118.2437]).bindPopup("Fire Incident in Los Angeles")
+        ],
+        station: [
+            L.marker([40.7128, -74.0060]).bindPopup("Fire Station in New York"),
+            L.marker([41.8781, -87.6298]).bindPopup("Fire Station in Chicago")
+        ]
+    };
+    
+    function updateMarkers() {
+        var showFire = document.getElementById("filter-fire").checked;
+        var showStation = document.getElementById("filter-station").checked;
+        
+        Object.values(markers).flat().forEach(marker => map.removeLayer(marker));
+        
+        if (showFire) markers.fire.forEach(marker => marker.addTo(map));
+        if (showStation) markers.station.forEach(marker => marker.addTo(map));
+    }
+    
+    document.getElementById("filter-fire").addEventListener("change", updateMarkers);
+    document.getElementById("filter-station").addEventListener("change", updateMarkers);
+    
+    updateMarkers();
+</script>
 
 </body>
 </html>
