@@ -17,6 +17,18 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; width: 100%; }
         #map { height: 100%; }
+        /* Expandable details section of map popups*/
+        details {
+            display: inline-block;
+            max-height: 200px;
+            overflow-y: scroll;
+        }
+        details[open] summary::after {  /* When open */
+            content: "Hide details";
+        }
+        summary::after {                /* When closed */
+            content: "Show details";
+        }
     </style>
    
 </head>
@@ -51,8 +63,10 @@
                         // Add the polygon to the map
                         L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
                             .bindPopup(`<b>${alert.properties.event}</b>
-                                        <br>${alert.properties.areaDesc}
-                                        <br>${alert.properties.headline}`);
+                                        <br>${alert.properties.headline}
+                                        <br><details><summary></summary>
+                                        <br>${alert.properties.description}
+                                        </details>`);
                     } 
                     // Case 2: Alert provides affectedZones (UGC geocode) instead of geometry
                     else if (alert.properties.affectedZones) {
@@ -70,8 +84,10 @@
                                     // Add the polygon to the map
                                     L.polygon(zoneCoords, { color: color, fillOpacity: 0.4 }).addTo(map)
                                         .bindPopup(`<b>${alert.properties.event}</b>
-                                                    <br>${alert.properties.areaDesc}
-                                                    <br>${alert.properties.headline}`);
+                                        <br>${alert.properties.headline}
+                                        <br><details><summary></summary>
+                                        <br>${alert.properties.description}
+                                        </details>`);
                                 }
                             } catch (error) {
                                 console.error("Error fetching zone data:", error);
