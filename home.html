@@ -65,7 +65,7 @@
                             .bindPopup(`<b>${alert.properties.event}</b>
                                         <br>${alert.properties.headline}
                                         <br><details><summary></summary>
-                                        <br>${alert.properties.description}
+                                        ${alert.properties.description}
                                         </details>`);
                     } 
                     // Case 2: Alert provides affectedZones (UGC geocode) instead of geometry
@@ -86,7 +86,7 @@
                                         .bindPopup(`<b>${alert.properties.event}</b>
                                         <br>${alert.properties.headline}
                                         <br><details><summary></summary>
-                                        <br>${alert.properties.description}
+                                        ${alert.properties.description}
                                         </details>`);
                                 }
                             } catch (error) {
