@@ -1,39 +1,43 @@
-<html>
-<head>
+// Initialize the map
+const map = L.map('map').setView([37.5, -119.5], 6); 
 
-    <title>FireWatch</title>
+// Add a tile layer (e.g., OpenStreetMap or another provider)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-    <link rel="icon" type="image/x-icon" href="icon.ico">
+// Function to fetch wildfire data and add markers
+async function addWildfireMarkers() {
+  const apiUrl = "https://api.weather.gov/alerts/active?status=actual&message_type=alert"; // Adjust URL if needed
+  
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""/>
+    // Loop through each wildfire event
+    data.features.forEach(fire => {
+      const coords = fire.geometry.coordinates;
+      const props = fire.properties;
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""></script>
+      if (coords) {
+        const [lng, lat] = coords; // GeoJSON uses [longitude, latitude]
 
-    <style>
-        #map { height: 100%; }
-    </style>
-   
-</head>
-<body>
+        // Create a Leaflet marker
+        const marker = L.marker([lat, lng]).addTo(map);
 
-<div id="map">
-    <script>
+        // Attach a popup with wildfire details
+        marker.bindPopup(`
+          <b>${props.name || "Unnamed Wildfire"}</b><br>
+          🔥 <strong>Status:</strong> ${props.status} <br>
+          📏 <strong>Size:</strong> ${props.size || "Unknown"} <br>
+          🕒 <strong>Last Updated:</strong> ${new Date(props.updated).toLocaleString()} 
+        `);
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching wildfire data:", error);
+  }
+}
 
-        // set the beginning location for the map
-        var map = L.map('map').setView([38, -98], 4);   // [latitude, longitude], zoomFactor
-
-        // add OpenStreetMap layer
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-
-    </script>
-</div>
-
-</body>
-</html>
+// Call function to load wildfire markers
+addWildfireMarkers();
