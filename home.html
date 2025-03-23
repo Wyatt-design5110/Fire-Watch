@@ -14,7 +14,43 @@
     crossorigin=""></script>
 
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; width: 100%; }
         #map { height: 100%; }
+        /* Expandable details section of map popups*/
+        details {
+            display: inline-block;
+            max-height: 200px;
+            overflow-y: scroll;
+        }
+        details[open] summary::after {  /* When open */
+            content: "Hide details";
+        }
+        summary::after {                /* When closed */
+            content: "Show details";
+            #map { height: 100vh; }
+        }
+        #filter-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        #locate-btn {
+            position: absolute;
+            bottom: 10px;  /* Moved to the bottom */
+            left: 10px;
+            background: white;
+            border: 1px solid black;
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 1000;
+        }
     </style>
    
 </head>
@@ -32,6 +68,100 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
+        // Function to fetch and display NWS alerts
+        async function fetchAndDisplayAlerts(eventType, color) {
+            try {
+                // Fetch alerts of the given eventType where status=actual (to exclude test alerts)
+                const response = await fetch(`https://api.weather.gov/alerts/active?event=${encodeURIComponent(eventType)}&status=actual`);
+                const data = await response.json();
+    
+                for (let alert of data.features) {
+                    // Case 1: Alert contains direct geometry (polygon)
+                    if (alert.geometry && alert.geometry.type === "Polygon") {
+                        
+                        // Create an array of [latitude,longitude] pairs that represent the alert perimeter
+                        let coords = alert.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                        
+                        // Add the polygon to the map
+                        L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
+                            .bindPopup(`<b>${alert.properties.event}</b>
+                                        <br>${alert.properties.headline}
+                                        <br><details><summary></summary>
+                                        ${alert.properties.description}
+                                        </details>`);
+                    } 
+                    // Case 2: Alert provides affectedZones (UGC geocode) instead of geometry
+                    else if (alert.properties.affectedZones) {
+                        for (let zoneURL of alert.properties.affectedZones) {
+                            try {
+                                // Fetch the coordinates of the given affectedZone
+                                let zoneResponse = await fetch(zoneURL);
+                                let zoneData = await zoneResponse.json();
+    
+                                if (zoneData.geometry && zoneData.geometry.type === "Polygon") {
+                                    
+                                    // Create an array of [latitude,longitude] pairs that represent the zone perimeter
+                                    let zoneCoords = zoneData.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                                    
+                                    // Add the polygon to the map
+                                    L.polygon(zoneCoords, { color: color, fillOpacity: 0.4 }).addTo(map)
+                                        .bindPopup(`<b>${alert.properties.event}</b>
+                                        <br>${alert.properties.headline}
+                                        <br><details><summary></summary>
+                                        ${alert.properties.description}
+                                        </details>`);
+                                }
+                            } catch (error) {
+                                console.error("Error fetching zone data:", error);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error(`Error fetching ${eventType} alerts:`, error);
+            }
+        }
+    
+        // Fetch alerts for both wildfire event types
+        fetchAndDisplayAlerts("Fire Warning", "red");
+        fetchAndDisplayAlerts("Red Flag Warning", "orange");
+        fetchAndDisplayAlerts("Fire Weather Watch", "yellow");
+
+        var map = L.map('map').setView([38, -98], 4);
+        
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        
+        // Add search control (only one instance now)
+        L.Control.geocoder().addTo(map);
+        
+        var markers = {
+            fire: [
+                L.marker([37.7749, -122.4194]).bindPopup("Fire Incident in San Francisco"),
+                L.marker([34.0522, -118.2437]).bindPopup("Fire Incident in Los Angeles")
+            ],
+            station: [
+                L.marker([40.7128, -74.0060]).bindPopup("Fire Station in New York"),
+                L.marker([41.8781, -87.6298]).bindPopup("Fire Station in Chicago")
+            ]
+        };
+        
+        function updateMarkers() {
+            var showFire = document.getElementById("filter-fire").checked;
+            var showStation = document.getElementById("filter-station").checked;
+            
+            Object.values(markers).flat().forEach(marker => map.removeLayer(marker));
+            
+            if (showFire) markers.fire.forEach(marker => marker.addTo(map));
+            if (showStation) markers.station.forEach(marker => marker.addTo(map));
+        }
+        
+        document.getElementById("filter-fire").addEventListener("change", updateMarkers);
+        document.getElementById("filter-station").addEventListener("change", updateMarkers);
+        
+        updateMarkers();
     </script>
 </div>
 
