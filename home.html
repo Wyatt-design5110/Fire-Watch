@@ -13,6 +13,8 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
 
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { height: 100%; width: 100%; }
@@ -65,6 +67,30 @@
             cursor: pointer;
             border-radius: 6px;
         }
+        /* Style for search dropdown menu */
+        .leaflet-control-geocoder-alternatives {
+            background: white;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 0;
+            margin: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            list-style: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        .leaflet-control-geocoder-alternatives li {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .leaflet-control-geocoder-alternatives li:hover {
+            background-color: #f0f0f0;
+        }
+        
     </style>
    
 </head>
@@ -80,6 +106,15 @@
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+        
+        /* Add the geo coder to control the map*/
+         L.Control.geocoder({
+            defaultMarkGeocode: true,
+            collapsed: false,
+            placeholder: 'Search for a place...',
+            errorMessage: 'Nothing found.',
+            suggestTimeout: 300
         }).addTo(map);
 
         async function fetchAndDisplayAlerts(eventType, color) {
@@ -133,7 +168,7 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        L.Control.geocoder().addTo(map);
+       // L.Control.geocoder().addTo(map);
 
         var markers = {
             fire: [
