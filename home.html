@@ -99,7 +99,52 @@
                 console.error(`Error fetching ${eventType} alerts:`, error);
             }
         }
-    
+
+        // Function to fetch and display active fires from FireNRT API
+        async function fetchAndDisplayFires(color,offset) {
+            try {
+                const response = await fetch(`https://firenrt.delta-backend.com/collections/public.eis_fire_lf_perimeter_nrt/items?
+                                                region=CONUS&limit=9999&offset=${encodeURIComponent(offset)}&f=geojson`);
+                const fireData = await response.json();
+
+                // Used to check if there are more items than the query limit
+                let numMatched = fireData.numberMatched;
+
+                for (let firePerimeter of fireData.features) {
+                    if (firePerimeter.geometry.type === "Polygon") {
+                        
+                        // Create an array of [latitude,longitude] pairs that represent the fire perimeter
+                        let coords = firePerimeter.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
+                        
+                        // Add the polygon to the map
+                        L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
+                            .bindPopup(`<b>${firePerimeter.id}</b>
+                                        <br>Fire area: ${firePerimeter.properties.farea} Km^2
+                                        <br><details><summary></summary>
+                                        </details>`);            
+                    }
+                    else {
+                        console.error(`Error fetching ${firePerimeter}`);
+                    }
+                }
+
+                return numMatched;
+
+            } catch (error) {
+                console.error("Error fetching fire data:", error);
+            }
+        }
+
+        // Make initial query to fetch fire data and return total number of items
+        let numMatched = fetchAndDisplayFires("red", 0);
+
+        // If there are more items than what the query limit allows, make additional calls
+        if (numMatched > 9999) {
+            for (let offset = 0; offset < numMatched; offset = offset + 9999) {
+                fetchAndDisplayFires("red", offset);
+            }
+        }
+        
         // Fetch alerts for both wildfire event types
         fetchAndDisplayAlerts("Fire Warning", "red");
         fetchAndDisplayAlerts("Red Flag Warning", "orange");
