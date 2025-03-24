@@ -111,7 +111,7 @@
                 let numMatched = fireData.numberMatched;
 
                 for (let firePerimeter of fireData.features) {
-                    if (firePerimeter.geometry.type === "Polygon") {
+                    if (firePerimeter.geometry) {
                         
                         // Create an array of [latitude,longitude] pairs that represent the fire perimeter
                         let coords = firePerimeter.geometry.coordinates[0].map(coord => [coord[1], coord[0]]);
