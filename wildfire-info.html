@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Wildfire Information</title>
     <link rel="icon" type="image/x-icon" href="icon.ico">
+    <script src="scripts.js" crossorigin=""></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,6 +59,14 @@
 
     <p>Wildfires are unplanned fires that burn in natural areas like forests, grasslands, and shrublands. They can spread quickly, destroying homes, wildlife habitats, and natural resources. Most wildfires are caused by human activity, although lightning and extreme weather also play a role.</p>
 
+    <h2>Current Alerts</h2>
+    <ul>
+        <li>Fire Warning: <span id="fireWarningCount">Loading...</span></li>
+        <li>Fire Weather Watch: <span id="fireWeatherWatchCount">Loading...</span></li>
+        <li>Red Flag Warning: <span id="redFlagWarningCount">Loading...</span></li>
+    </ul>
+    <script>getAlertCounts();</script>
+    
     <h2>Causes of Wildfires</h2>
     <ul>
         <li>Unattended campfires</li>
