@@ -9,6 +9,8 @@
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
     crossorigin=""/>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css"/>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""></script>
@@ -62,29 +64,6 @@
             font-size: 14px;
             cursor: pointer;
             border-radius: 6px;
-        }
-        /* Style for search dropdown menu */
-        .leaflet-control-geocoder-alternatives {
-            background: white;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            line-height: 1.5;
-            padding: 0;
-            margin: 0;
-            max-height: 220px;
-            overflow-y: auto;
-            list-style: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-        .leaflet-control-geocoder-alternatives li {
-            padding: 8px 12px;
-            border-bottom: 1px solid #eee;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .leaflet-control-geocoder-alternatives li:hover {
-            background-color: #f0f0f0;
         }
         /* Expandable details section of map popups*/
         details {
