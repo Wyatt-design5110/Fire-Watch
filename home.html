@@ -42,22 +42,10 @@
             padding: 10px;
             border-radius: 8px;
         }
-        #locate-btn {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: white;
-            border: 1px solid black;
-            padding: 5px 10px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 1000;
-        }
 
-        /* Updated geolocation button position */
-        #geolocate-btn {
+        /* Shared button style */
+        .bottom-button {
             position: absolute;
-            bottom: 10px;
             left: 10px;
             z-index: 1001;
             background-color: white;
@@ -67,7 +55,19 @@
             cursor: pointer;
             border-radius: 6px;
         }
-        /* Style for search dropdown menu */
+
+        #info-btn {
+            bottom: 50px; /* Above the Locate Me button */
+        }
+
+        #geolocate-btn {
+            bottom: 10px;
+        }
+
+        .bottom-button:hover {
+            background-color: #f0f0f0;
+        }
+
         .leaflet-control-geocoder-alternatives {
             background: white;
             border: 1px solid #ccc;
@@ -90,14 +90,16 @@
         .leaflet-control-geocoder-alternatives li:hover {
             background-color: #f0f0f0;
         }
-        
     </style>
    
 </head>
 <body>
 
-<!-- button now bottom-left -->
-<button id="geolocate-btn">Locate Me</button>
+<!-- Wildfire Info Button -->
+<button id="info-btn" class="bottom-button" onclick="location.href='wildfire-info.html'">Wildfire Info</button>
+
+<!-- Geolocation Button -->
+<button id="geolocate-btn" class="bottom-button">Locate Me</button>
 
 <div id="map">
     <script>
@@ -108,8 +110,7 @@
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
         
-        /* Add the geo coder to control the map*/
-         L.Control.geocoder({
+        L.Control.geocoder({
             defaultMarkGeocode: true,
             collapsed: false,
             placeholder: 'Search for a place...',
@@ -160,15 +161,6 @@
         fetchAndDisplayAlerts("Fire Warning", "red");
         fetchAndDisplayAlerts("Red Flag Warning", "orange");
         fetchAndDisplayAlerts("Fire Weather Watch", "yellow");
-
-        var map = L.map('map').setView([38, -98], 4);
-
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-
-       // L.Control.geocoder().addTo(map);
 
         var markers = {
             fire: [
