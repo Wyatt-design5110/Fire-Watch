@@ -17,7 +17,7 @@
 
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 
-    <script src="scripts.js" crossorigin=""></script>
+    <script src="scripts.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -65,11 +65,19 @@
             cursor: pointer;
             border-radius: 6px;
         }
+        /* Map popups */
+        .leaflet-popup {
+            width: 400px;
+        }
+        .leaflet-popup-content p {
+            width: 360px;
+        }
         /* Expandable details section of map popups*/
         details {
             display: inline-block;
             max-height: 200px;
             overflow-y: scroll;
+            width: 375px;
         }
         details[open] summary::after {  /* When open */
             content: "Hide details";
