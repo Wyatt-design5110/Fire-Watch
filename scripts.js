@@ -75,7 +75,7 @@ async function fetchAndDisplayAlerts(eventType, color) {
                 L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
                     .bindPopup(`<b>${alert.properties.event}</b>
                                 <br><p>${alert.properties.headline}</p>
-                                <br><details><summary></summary>
+                                <details><summary></summary>
                                 <p>${alert.properties.description.replaceAll("*","<br><br>*")}
                                 </p></details>`);           
             } 
@@ -96,7 +96,7 @@ async function fetchAndDisplayAlerts(eventType, color) {
                             L.polygon(zoneCoords, { color: color, fillOpacity: 0.4 }).addTo(map)
                                 .bindPopup(`<b>${alert.properties.event}</b>
                                     <br><p>${alert.properties.headline}</p>
-                                    <br><details><summary></summary>
+                                    <details><summary></summary>
                                     <p>${alert.properties.description.replaceAll("*","<br><br>*")}
                                     </p></details>`); 
                         }
