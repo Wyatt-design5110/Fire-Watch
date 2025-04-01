@@ -74,10 +74,10 @@ async function fetchAndDisplayAlerts(eventType, color) {
                 
                 L.polygon(coords, { color: color, fillOpacity: 0.4 }).addTo(map)
                     .bindPopup(`<b>${alert.properties.event}</b>
-                                <br>${alert.properties.headline}
+                                <br><p>${alert.properties.headline}</p>
                                 <br><details><summary></summary>
-                                ${alert.properties.description}
-                                </details>`);            
+                                <p>${alert.properties.description.replaceAll("*","<br><br>*")}
+                                </p></details>`);           
             } 
             // Case 2: Alert provides affectedZones (UGC geocode) instead of geometry
             else if (alert.properties.affectedZones) {
@@ -95,10 +95,10 @@ async function fetchAndDisplayAlerts(eventType, color) {
                             // Add the polygon to the map
                             L.polygon(zoneCoords, { color: color, fillOpacity: 0.4 }).addTo(map)
                                 .bindPopup(`<b>${alert.properties.event}</b>
-                                    <br>${alert.properties.headline}
+                                    <br><p>${alert.properties.headline}</p>
                                     <br><details><summary></summary>
-                                    ${alert.properties.description}
-                                    </details>`);  
+                                    <p>${alert.properties.description.replaceAll("*","<br><br>*")}
+                                    </p></details>`); 
                         }
                     } catch (error) {
                         console.error("Error fetching zone data:", error);
