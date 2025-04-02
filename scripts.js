@@ -150,7 +150,8 @@ async function fetchAndDisplayFires(color, now) {
         // If the VIIRS detections are late to post (ie, none were returned) get the detections from 12h ago
         if (numMatched == 0) {
             // Subtract 12 hours from current time and retry
-            fetchAndDisplayFires("red", now.setHours(now.getHours() - 12));
+            let prev = new Date(now.setHours(now.getHours() - 12));
+            fetchAndDisplayFires("red", prev);
         }
   
     } catch (error) {
