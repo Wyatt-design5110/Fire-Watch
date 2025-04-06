@@ -85,6 +85,21 @@
         summary::after {                /* When closed */
             content: "Show details";
         }
+        /* Popup adjustments for mobile devices */
+        @media only screen and (min-device-width: 480px){
+            details {
+                display: inline-block;
+                max-height: 200px;
+                overflow-y: scroll;
+                width: 315px;
+            }
+            .leaflet-popup {
+                width: 345px;
+            }
+            .leaflet-popup-content p {
+                width: 310px;
+            }
+        }
     </style>
 </head>
 <body>
